@@ -8,6 +8,8 @@ Dose response curve fitting in python.
 
 Single compound 3-param model.
 
+
+input:
 ```python
 import pydrc
 
@@ -23,6 +25,7 @@ print(df.head())
 print(drc.param_store)
 ```
 
+output:
 ```
         conc  response drug
 1.000000e-10       0.0    A
@@ -35,9 +38,13 @@ print(drc.param_store)
 Params3(top=40.50445968423368, bottom=0.3224712712407177, ec50=1.1004776487262973e-07)
 ```
 
+------------
+
 
 Multi compound 3-param model.
 
+
+input:
 ```python
 import pydrc
 
@@ -50,6 +57,7 @@ drc.fit_plot(x=df.conc, y=df.response, c=df.drug)
 print(drc.param_store)
 ```
 
+output:
 ```
 {
     'A': Params3(top=40.50445968423368, bottom=0.3224712712407177, ec50=1.1004776487262973e-07),
