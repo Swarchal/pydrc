@@ -19,5 +19,6 @@ setup(
     packages=["pydrc"],
     requires=read_requirements(),
     tests_require="pytest",
+    python_requires=">=3.8",
     zip_safe=True,
 )

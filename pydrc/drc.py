@@ -41,7 +41,6 @@ class BaseDRC:
         self.ec50_ = None
         self.bottom_ = None
         self.top_ = None
-        self.model_store = None
         self.param_store = None
 
     @staticmethod
@@ -74,10 +73,10 @@ class BaseDRC:
             for name, group in df.groupby("c"):
                 plt.scatter(group.x, group.y, label=name)
             plt.xscale("log")
-            for i in self.model_store.keys():
+            for i in self.param_store.keys():
                 xmin, xmax = self.data_store[i]
                 x = np.logspace(np.log10(xmin), np.log10(xmax), 1000)
-                y = self.model(x, *self.model_store[i])
+                y = self.model(x, *self.param_store[i])
                 plt.plot(x, y, label=i)
             plt.legend()
             plt.show()
@@ -86,7 +85,7 @@ class BaseDRC:
             plt.xscale("log")
             xmin, xmax = self.data_store
             x = np.logspace(np.log10(xmin), np.log10(xmax), 1000)
-            y = self.model(x, *self.model_store)
+            y = self.model(x, *self.param_store)
             plt.plot(x, y)
             plt.show()
 
