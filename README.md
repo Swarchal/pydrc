@@ -33,8 +33,9 @@ output:
 3.000000e-08      12.0    A
 1.000000e-07      19.0    A
 3.000000e-07      28.0    A
+```
 
-
+```
 Params3(top=40.50445968423368, bottom=0.3224712712407177, ec50=1.1004776487262973e-07)
 ```
 
@@ -52,12 +53,15 @@ import pydrc
 df = pydrc.data.test_data1().dropna()
 
 drc = pydrc.DRC3()
-drc.fit_plot(x=df.conc, y=df.response, c=df.drug)
+drc.fit(x=df.conc, y=df.response, c=df.drug)
+drc.plot()
 
 print(drc.param_store)
 ```
 
 output:
+![pydrc_plot2](https://user-images.githubusercontent.com/10051679/167714692-8f3ff156-234f-4907-9866-d8ba043e270c.png)
+
 ```
 {
     'A': Params3(top=40.50445968423368, bottom=0.3224712712407177, ec50=1.1004776487262973e-07),
@@ -65,4 +69,3 @@ output:
 }
 ```
 
-![pydrc_plot2](https://user-images.githubusercontent.com/10051679/167714692-8f3ff156-234f-4907-9866-d8ba043e270c.png)

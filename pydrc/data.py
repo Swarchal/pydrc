@@ -5,7 +5,8 @@ import textwrap
 
 
 def test_data1():
-    data = textwrap.dedent("""
+    data = textwrap.dedent(
+        """
         conc,response,drug
         1.00E-10,0,A
         1.00E-08,1,A
@@ -73,6 +74,7 @@ def test_data1():
         3.00E-05,38,B
         1.00E-04,38,B
         3.00E-04,,B
-    """)
+    """
+    )
     data_io = StringIO(data)
     return pd.read_csv(data_io)

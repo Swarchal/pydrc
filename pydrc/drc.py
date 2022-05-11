@@ -2,7 +2,7 @@
 Actual dose response fitting classes.
 """
 
-from typing import Optional, NamedTuple, Tuple
+from typing import Optional, NamedTuple
 
 import numpy as np
 import pandas as pd
@@ -16,11 +16,6 @@ class Params3(NamedTuple):
     top: float
     bottom: float
     ec50: float
-
-
-class DataStats(NamedTuple):
-    min_x: float
-    max_x: float
 
 
 class BaseDRC:
@@ -44,49 +39,43 @@ class BaseDRC:
         self.param_store = None
 
     @staticmethod
-    def model():
+    def model(*args):
         raise NotImplementedError
 
     def _fit(self, x, y, c=None):
         raise NotImplementedError
 
     def fit(self, x: ArrayLike, y: ArrayLike, c: Optional[ArrayLike] = None):
+        self.x, self.y, self.c = x, y, c
         param_store = {}
-        data_store = {}
         if c is not None:
             df = pd.DataFrame({"x": x, "y": y, "c": c})
             for name, group in df.groupby("c"):
-                params, datastat = self._fit(group.x, group.y, group.c)
-                param_store[name] = params
-                data_store[name] = datastat
+                param_store[name] = self._fit(group.x, group.y, group.c)
             self.param_store = param_store
-            self.data_store = data_store
         else:
-            params, datastats = self._fit(x, y)
-            self.param_store = params
-            self.data_store = datastats
+            self.param_store = self._fit(x, y)
 
-    def fit_plot(self, x, y, c=None):
-        self.fit(x, y, c)
-        if c is not None:
-            df = pd.DataFrame({"x": x, "y": y, "c": c})
+    def plot(self):
+        assert self.x is not None and self.y is not None
+        assert self.param_store is not None
+        xmin, xmax = min(self.x), max(self.x)
+        x_interp = np.logspace(np.log10(xmin), np.log10(xmax), 1000)
+        if self.c is not None:
+            df = pd.DataFrame({"x": self.x, "y": self.y, "c": self.c})
             for name, group in df.groupby("c"):
                 plt.scatter(group.x, group.y, label=name)
             plt.xscale("log")
             for i in self.param_store.keys():
-                xmin, xmax = self.data_store[i]
-                x = np.logspace(np.log10(xmin), np.log10(xmax), 1000)
-                y = self.model(x, *self.param_store[i])
-                plt.plot(x, y, label=i)
+                y_interp = self.model(x_interp, *self.param_store[i])
+                plt.plot(x_interp, y_interp, label=i)
             plt.legend()
             plt.show()
         else:
-            plt.scatter(x, y)
+            plt.scatter(self.x, self.y)
             plt.xscale("log")
-            xmin, xmax = self.data_store
-            x = np.logspace(np.log10(xmin), np.log10(xmax), 1000)
-            y = self.model(x, *self.param_store)
-            plt.plot(x, y)
+            y_interp = self.model(x_interp, *self.param_store)
+            plt.plot(x_interp, y_interp)
             plt.show()
 
 
@@ -102,7 +91,7 @@ class DRC3(BaseDRC):
 
     def _fit(
         self, x: ArrayLike, y: ArrayLike, c: Optional[ArrayLike] = None
-    ) -> Tuple[Params3, DataStats]:
+    ) -> Params3:
         popt, *_ = curve_fit(
             self.model,
             x,
@@ -113,8 +102,7 @@ class DRC3(BaseDRC):
             maxfev=self.iter,
         )
         top, bottom, ec50 = popt
-        min_x, max_x = min(x), max(x)
-        return Params3(top, bottom, ec50), DataStats(min_x, max_x)
+        return Params3(top, bottom, ec50)
 
 
 class DRC4(BaseDRC):
