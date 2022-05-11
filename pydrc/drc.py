@@ -32,10 +32,6 @@ class BaseDRC:
         self.iter = iter
         self.init = init
         self.bounds = bounds if bounds else (-np.inf, np.inf)
-        self.hillslope_ = None
-        self.ec50_ = None
-        self.bottom_ = None
-        self.top_ = None
         self.param_store = None
 
     @staticmethod
