@@ -4,7 +4,7 @@ from io import StringIO
 import textwrap
 
 
-def test_data1():
+def two_cmpds():
     data = textwrap.dedent(
         """
         conc,response,drug

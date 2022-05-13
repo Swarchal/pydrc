@@ -12,17 +12,11 @@ import matplotlib.pyplot as plt
 from .mytypes import ArrayLike
 
 
-class Params3(NamedTuple):
+class Params(NamedTuple):
     top: float
     bottom: float
     ec50: float
-
-
-class Params4(NamedTuple):
-    top: float
-    bottom: float
-    ec50: float
-    hillslope: float
+    hillslope: Optional[float] = 1.0
 
 
 class BaseDRC:
@@ -47,8 +41,17 @@ class BaseDRC:
     def model(*args):
         raise NotImplementedError
 
-    def _fit(self, x, y, c=None):
-        raise NotImplementedError
+    def _fit(self, x: ArrayLike, y: ArrayLike, c: Optional[ArrayLike] = None) -> Params:
+        popt, *_ = curve_fit(
+            self.model,
+            x,
+            y,
+            p0=self.init,
+            method=self.method,
+            bounds=self.bounds,
+            maxfev=self.iter,
+        )
+        return Params(*popt)
 
     def do_rescaling(self, y: ArrayLike, c: Optional[ArrayLike] = None) -> ArrayLike:
         """rescale each response between 0 and 100"""
@@ -108,26 +111,11 @@ class DRC3(BaseDRC):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.bounds is None:
-            self.bounds = ((-np.inf, np.inf, np.inf), (np.inf, np.inf, np.inf))
+            self.bounds = ((-np.inf, -np.inf, -np.inf), (np.inf, np.inf, np.inf))
 
     @staticmethod
-    def model(x, top, bottom, ec50) -> np.ndarray:
+    def model(x, top, bottom, ec50, hillslope=1) -> np.ndarray:
         return bottom + x * (top - bottom) / (ec50 + x)
-
-    def _fit(
-        self, x: ArrayLike, y: ArrayLike, c: Optional[ArrayLike] = None
-    ) -> Params3:
-        popt, *_ = curve_fit(
-            self.model,
-            x,
-            y,
-            p0=self.init,
-            method=self.method,
-            bounds=self.bounds,
-            maxfev=self.iter,
-        )
-        top, bottom, ec50 = popt
-        return Params3(top, bottom, ec50)
 
 
 class DRC4(BaseDRC):
@@ -145,18 +133,3 @@ class DRC4(BaseDRC):
         return bottom + (x ** hillslope) * (top - bottom) / (
             (x ** hillslope) + (ec50 ** 1)
         )
-
-    def _fit(
-        self, x: ArrayLike, y: ArrayLike, c: Optional[ArrayLike] = None
-    ) -> Params4:
-        popt, *_ = curve_fit(
-            self.model,
-            x,
-            y,
-            p0=self.init,
-            method=self.method,
-            bounds=self.bounds,
-            maxfev=self.iter,
-        )
-        top, bottom, ec50, hillslope = popt
-        return Params4(top, bottom, ec50, hillslope)

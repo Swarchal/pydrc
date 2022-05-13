@@ -13,7 +13,7 @@ Single compound 3-param model.
 import pydrc
 
 df = (
-    pydrc.data.test_data1()
+    pydrc.data.two_cmpds()
     .dropna()
     .query("drug == 'A'")
 )
@@ -37,7 +37,12 @@ print(drc.param_store)
 ```
 
 ```
-Params3(top=40.50445968423368, bottom=0.3224712712407177, ec50=1.1004776487262973e-07)
+Params(
+    top=40.50445968423368,
+    bottom=0.3224712712407177,
+    ec50=1.1004776487262973e-07,
+    hillslope=1.0
+)
 ```
 
 ------------
@@ -49,7 +54,7 @@ Multi compound 3-param model.
 ```python
 import pydrc
 
-df = pydrc.data.test_data1().dropna()
+df = pydrc.data.two_cmpds().dropna()
 
 drc = pydrc.DRC3()
 drc.fit(x=df.conc, y=df.response, c=df.drug)
@@ -65,8 +70,8 @@ print(drc.param_store)
 
 ```
 {
-    'A': Params3(top=40.50445968423368, bottom=0.3224712712407177, ec50=1.1004776487262973e-07),
-    'B': Params3(top=34.884182594346335, bottom=-0.14824892808869294, ec50=6.994367044164843e-07)
+    'A': Params(top=40.50445968423368, bottom=0.3224712712407177, ec50=1.1004776487262973e-07, hillslope=1.0),
+    'B': Params(top=34.884182594346335, bottom=-0.14824892808869294, ec50=6.994367044164843e-07, hillslope=1.0)
 }
 ```
 
@@ -77,7 +82,7 @@ Multi compounds 4-parameter model specifying parameter bounds.
 ```python
 import pydrc
 
-df = pydrc.test_data1().dropna()
+df = pydrc.data.two_cmpds().dropna()
 
 # top, bottom, ec50, hillslope
 mins = (0, 0, 0, -3)
@@ -97,8 +102,8 @@ print(drc.param_store)
 
 ```
 {
-    'A': Params4(top=41.9..., bottom=2.3..., ec50=2.9...e-06, hillslope=0.8...),
-    'B': Params4(top=34.7..., bottom=8.9...e-16, ec50=4.7...e-07, hillslope=1.0...)
+    'A': Params(top=41.9..., bottom=2.3..., ec50=2.9...e-06, hillslope=0.8...),
+    'B': Params(top=34.7..., bottom=8.9...e-16, ec50=4.7...e-07, hillslope=1.0...)
 }
 ```
 
