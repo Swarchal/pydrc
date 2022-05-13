@@ -18,6 +18,13 @@ class Params3(NamedTuple):
     ec50: float
 
 
+class Params4(NamedTuple):
+    top: float
+    bottom: float
+    ec50: float
+    hillslope: float
+
+
 class BaseDRC:
     def __init__(
         self,
@@ -33,7 +40,7 @@ class BaseDRC:
         self.method = "trf"
         self.iter = iter
         self.init = init
-        self.bounds = bounds if bounds else (-np.inf, np.inf)
+        self.bounds = bounds
         self.param_store = None
 
     @staticmethod
@@ -100,6 +107,8 @@ class DRC3(BaseDRC):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if self.bounds is None:
+            self.bounds = ((-np.inf, np.inf, np.inf), (np.inf, np.inf, np.inf))
 
     @staticmethod
     def model(x, top, bottom, ec50) -> np.ndarray:
@@ -126,4 +135,28 @@ class DRC4(BaseDRC):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        raise NotImplementedError("not made this yet")
+        if self.init is None:
+            self.init = (100, 0, 0.1, 1)
+        if self.bounds is None:
+            self.bounds = ((-np.inf, -np.inf, -np.inf, -3), (np.inf, np.inf, np.inf, 3))
+
+    @staticmethod
+    def model(x, top, bottom, ec50, hillslope) -> np.ndarray:
+        return bottom + (x ** hillslope) * (top - bottom) / (
+            (x ** hillslope) + (ec50 ** 1)
+        )
+
+    def _fit(
+        self, x: ArrayLike, y: ArrayLike, c: Optional[ArrayLike] = None
+    ) -> Params4:
+        popt, *_ = curve_fit(
+            self.model,
+            x,
+            y,
+            p0=self.init,
+            method=self.method,
+            bounds=self.bounds,
+            maxfev=self.iter,
+        )
+        top, bottom, ec50, hillslope = popt
+        return Params4(top, bottom, ec50, hillslope)

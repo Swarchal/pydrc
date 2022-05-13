@@ -70,3 +70,35 @@ print(drc.param_store)
 }
 ```
 
+-----------
+
+Multi compounds 4-parameter model specifying parameter bounds.
+
+```python
+import pydrc
+
+df = pydrc.test_data1().dropna()
+
+# top, bottom, ec50, hillslope
+mins = (0, 0, 0, -3)
+maxs = (100, 100, 1, 3)
+
+drc = pydrc.DRC4(bounds=(mins, maxs))
+
+drc.fit(df.conc, df.response, df.drug)
+drc.plot()
+```
+
+![pydrc_4param](https://user-images.githubusercontent.com/10051679/168300651-71e56d06-4c2f-43c2-a880-df13082fcbe4.png)
+
+```python
+print(drc.param_store)
+```
+
+```
+{
+    'A': Params4(top=41.9..., bottom=2.3..., ec50=2.9...e-06, hillslope=0.8...),
+    'B': Params4(top=34.7..., bottom=8.9...e-16, ec50=4.7...e-07, hillslope=1.0...)
+}
+```
+

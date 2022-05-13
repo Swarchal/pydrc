@@ -17,7 +17,7 @@ setup(
     author="Scott Warchal",
     url="https://github.com/Swarchal/pydrc",
     packages=["pydrc"],
-    requires=read_requirements(),
+    install_requires=read_requirements(),
     tests_require="pytest",
     python_requires=">=3.8",
     zip_safe=True,
