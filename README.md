@@ -2,6 +2,16 @@
 
 Dose response curve fitting in python.
 
+Still a work in progress.
+
+## Package aims:
+
+- Simple scikit-learn like API.
+- Easy to use with pandas DataFrames or numpy arrays.
+- Sensible default parameters, but ability to tweak everything if needed.
+- Easily extendable if customisation is required.
+- Similar results to GraphPad Prism or R's drc package on the same datasets.
+
 
 ## examples
 
@@ -61,8 +71,7 @@ drc.fit(x=df.conc, y=df.response, c=df.drug)
 drc.plot()
 ```
 
-![pydrc_plot2](https://user-images.githubusercontent.com/10051679/167714692-8f3ff156-234f-4907-9866-d8ba043e270c.png)
-
+![pydrc_3param](https://user-images.githubusercontent.com/10051679/168306046-e99a3b7f-8a3c-4579-930a-8e5e0b1a5a7c.png)
 
 ```python
 print(drc.param_store)
