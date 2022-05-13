@@ -79,8 +79,8 @@ print(drc.param_store)
 
 ```
 {
-    'A': Params(top=40.50445968423368, bottom=0.3224712712407177, ec50=1.1004776487262973e-07, hillslope=1.0),
-    'B': Params(top=34.884182594346335, bottom=-0.14824892808869294, ec50=6.994367044164843e-07, hillslope=1.0)
+    'A': Params(top=40.5, bottom=0.3, ec50=1.1e-07, hillslope=1.0),
+    'B': Params(top=34.8, bottom=-0.1, ec50=6.9e-07, hillslope=1.0)
 }
 ```
 
@@ -111,8 +111,41 @@ print(drc.param_store)
 
 ```
 {
-    'A': Params(top=41.9..., bottom=2.3..., ec50=2.9...e-06, hillslope=0.8...),
-    'B': Params(top=34.7..., bottom=8.9...e-16, ec50=4.7...e-07, hillslope=1.0...)
+    'A': Params(top=41.9, bottom=2.3, ec50=2.9e-06, hillslope=0.8),
+    'B': Params(top=34.7, bottom=8.9e-16, ec50=4.7e-07, hillslope=1.0)
+}
+```
+
+------------
+
+Multi compounds, parameter bounds and rescaling values to min-max.
+
+```python
+import pydrc
+
+df = pydrc.data.two_cmpds().dropna()
+
+# top, bottom, ec50, hillslope
+mins = (0, 0, 0, -3)
+maxs = (100, 100, 1, 3)
+
+drc = pydrc.DRC4(rescale=True, bounds=(mins, maxs))
+
+drc.fit(df.conc, df.response, df.drug)
+drc.plot()
+```
+
+![pydrc_4param_rescaled](https://user-images.githubusercontent.com/10051679/168308427-8d8a1387-1b69-4cd6-832c-65e62ab19462.png)
+
+
+```python
+print(drc.param_store)
+```
+
+```
+{
+    'A': Params(top=95.3, bottom=4.7e-13, ec50=2.9e-06, hillslope=0.80),
+    'B': Params(top=91.5, bottom=9.8e-14, ec50=4.7e-07, hillslope=1.0)
 }
 ```
 
