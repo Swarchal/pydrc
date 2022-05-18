@@ -53,25 +53,37 @@ class BaseDRC:
         )
         return Params(*popt)
 
-    def do_rescaling(self, y: ArrayLike, c: Optional[ArrayLike] = None) -> ArrayLike:
+    @staticmethod
+    def _rescale_group(df: pd.DataFrame) -> pd.DataFrame:
+        "simple min-max rescale with data points"""
+        ymin = df.y.min()
+        ymax = df.y.max()
+        df.y = (df.y - ymin) / (ymax - ymin) * 100
+        return df
+
+    def _rescale_group_advanced(self, df: pd.DataFrame) -> pd.DataFrame:
+        """rescale to min-max of pre-fitted curve"""
+        params = self._fit(df.x, df.y)
+        yhat = self.model(df.x, *params)
+        ymin = min(yhat)
+        ymax = max(yhat)
+        df.y = (df.y - ymin) / (ymax - ymin) * 100
+        return df
+
+    def do_rescaling(self, x: ArrayLike, y: ArrayLike, c: Optional[ArrayLike] = None) -> ArrayLike:
         """rescale each response between 0 and 100"""
+        x = np.asarray(x)
         y = np.asarray(y)
 
-        def _rescale_group(df: pd.DataFrame) -> pd.DataFrame:
-            ymin = df.y.min()
-            ymax = df.y.max()
-            df.y = (df.y - ymin) / (ymax - ymin) * 100
-            return df
-
         if c is not None:
-            df = pd.DataFrame({"y": y, "c": c})
-            df = df.groupby("c").apply(_rescale_group)
+            df = pd.DataFrame({"x": x, "y": y, "c": c})
+            df = df.groupby("c").apply(self._rescale_group_advanced)
             return df.y.values
         return (y - y.min()) / (y.max() - y.min()) * 100
 
     def fit(self, x: ArrayLike, y: ArrayLike, c: Optional[ArrayLike] = None):
         if self.rescale:
-            y = self.do_rescaling(y, c)
+            y = self.do_rescaling(x, y, c)
         self.x, self.y, self.c = x, y, c
         param_store = {}
         if c is not None:
