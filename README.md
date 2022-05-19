@@ -126,8 +126,8 @@ import pydrc
 df = pydrc.data.two_cmpds().dropna()
 
 # top, bottom, ec50, hillslope
-mins = (0, 0, 0, -3)
-maxs = (100, 100, 1, 3)
+mins = (0, 0, 0, 0.5)
+maxs = (100, 0, 1, 1.6)
 
 drc = pydrc.DRC4(rescale=True, bounds=(mins, maxs))
 
@@ -135,8 +135,7 @@ drc.fit(df.conc, df.response, df.drug)
 drc.plot()
 ```
 
-![pydrc_4param_rescaled](https://user-images.githubusercontent.com/10051679/168308427-8d8a1387-1b69-4cd6-832c-65e62ab19462.png)
-
+![drc_4param_rescaled](https://user-images.githubusercontent.com/10051679/169295786-0a2c4b92-7c79-45bb-826a-2cca4e100bf6.png) 
 
 ```python
 print(drc.param_store)
@@ -144,8 +143,8 @@ print(drc.param_store)
 
 ```
 {
-    'A': Params(top=95.3, bottom=4.7e-13, ec50=2.9e-06, hillslope=0.80),
-    'B': Params(top=91.5, bottom=9.8e-14, ec50=4.7e-07, hillslope=1.0)
+    'A': Params(top=99.9, bottom=0.09, ec50=3.99e-06, hillslope=0.77),
+    'B': Params(top=99.9, bottom=0.02, ec50=4.7e-07, hillslope=1.02)
 }
 ```
 
