@@ -55,7 +55,7 @@ class BaseDRC:
 
     @staticmethod
     def _rescale_group(df: pd.DataFrame) -> pd.DataFrame:
-        "simple min-max rescale with data points"""
+        """simple min-max rescale with data points"""
         ymin = df.y.min()
         ymax = df.y.max()
         df.y = (df.y - ymin) / (ymax - ymin) * 100
@@ -70,7 +70,9 @@ class BaseDRC:
         df.y = (df.y - ymin) / (ymax - ymin) * 100
         return df
 
-    def do_rescaling(self, x: ArrayLike, y: ArrayLike, c: Optional[ArrayLike] = None) -> ArrayLike:
+    def do_rescaling(
+        self, x: ArrayLike, y: ArrayLike, c: Optional[ArrayLike] = None
+    ) -> ArrayLike:
         """rescale each response between 0 and 100"""
         x = np.asarray(x)
         y = np.asarray(y)
@@ -99,22 +101,22 @@ class BaseDRC:
         assert self.param_store is not None
         xmin, xmax = min(self.x), max(self.x)
         x_interp = np.logspace(np.log10(xmin), np.log10(xmax), 1000)
+        fig, ax = plt.subplots()
         if self.c is not None:
             df = pd.DataFrame({"x": self.x, "y": self.y, "c": self.c})
             for name, group in df.groupby("c"):
-                plt.scatter(group.x, group.y, label=name)
-            plt.xscale(xscale)
+                ax.scatter(group.x, group.y, label=name)
+            ax.set_xscale(xscale)
             for i in self.param_store.keys():
                 y_interp = self.model(x_interp, *self.param_store[i])
-                plt.plot(x_interp, y_interp, label=i)
-            plt.legend()
-            plt.show()
+                ax.plot(x_interp, y_interp, label=i)
+            ax.legend()
         else:
-            plt.scatter(self.x, self.y)
-            plt.xscale(xscale)
+            ax.scatter(self.x, self.y)
+            ax.set_xscale(xscale)
             y_interp = self.model(x_interp, *self.param_store)
-            plt.plot(x_interp, y_interp)
-            plt.show()
+            ax.plot(x_interp, y_interp)
+        return fig, ax
 
 
 class DRC3(BaseDRC):
