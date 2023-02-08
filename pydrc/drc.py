@@ -2,7 +2,7 @@
 Actual dose response fitting classes.
 """
 
-from typing import Optional, NamedTuple, Tuple
+from typing import Dict, Optional, NamedTuple, Tuple
 
 import numpy as np
 import pandas as pd
@@ -36,6 +36,16 @@ class BaseDRC:
         self.init = init
         self.bounds = bounds
         self.param_store = None
+
+    def __getitem__(self, name: str) -> Optional[Params]:
+        if isinstance(self.param_store, dict):
+            # multiple models, access model by name return Params
+            return self.param_store[name]
+        elif isinstance(self.param_store, Params):
+            # single model, access params
+            return self.param_store.__getattribute__(name)
+        else:
+            return None
 
     @staticmethod
     def model(*args):
@@ -144,6 +154,6 @@ class DRC4(BaseDRC):
 
     @staticmethod
     def model(x, top, bottom, ec50, hillslope) -> np.ndarray:
-        return bottom + (x ** hillslope) * (top - bottom) / (
-            (x ** hillslope) + (ec50 ** 1)
+        return bottom + (x**hillslope) * (top - bottom) / (
+            (x**hillslope) + (ec50**1)
         )

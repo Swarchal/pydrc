@@ -12,7 +12,7 @@ def read_requirements():
 
 setup(
     name="pydrc",
-    version="0.0.1",
+    version="0.1.0",
     description="Dose reponse curve fitting",
     author="Scott Warchal",
     url="https://github.com/Swarchal/pydrc",
