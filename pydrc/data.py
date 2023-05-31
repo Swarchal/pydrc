@@ -1,10 +1,11 @@
 import pandas as pd
+import numpy as np
 
 from io import StringIO
 import textwrap
 
 
-def two_cmpds():
+def two_cmpds(log_x: bool = False) -> pd.DataFrame:
     data = textwrap.dedent(
         """
         conc,response,drug
@@ -77,4 +78,7 @@ def two_cmpds():
     """
     )
     data_io = StringIO(data)
-    return pd.read_csv(data_io)
+    df = pd.read_csv(data_io)
+    if log_x:
+        df["conc"] = np.log10(df["conc"])
+    return df

@@ -2,7 +2,7 @@
 Actual dose response fitting classes.
 """
 
-from typing import Dict, Optional, NamedTuple, Tuple
+from typing import Optional, NamedTuple
 
 import numpy as np
 import pandas as pd
@@ -26,11 +26,13 @@ class BaseDRC:
         init: Optional[ArrayLike] = None,
         bounds: Optional[ArrayLike] = None,
         rescale: bool = False,
+        log_transformed=False,
     ):
         self.x = None
         self.y = None
         self.c = None
         self.rescale = rescale
+        self.log_transformed = log_transformed
         self.method = "trf"
         self.iter = iter
         self.init = init
@@ -106,11 +108,16 @@ class BaseDRC:
         else:
             self.param_store = self._fit(x, y)
 
-    def plot(self, xscale="log"):
+    def plot(self):
         assert self.x is not None and self.y is not None
         assert self.param_store is not None
         xmin, xmax = min(self.x), max(self.x)
-        x_interp = np.logspace(np.log10(xmin), np.log10(xmax), 1000)
+        if self.log_transformed:
+            x_interp = np.linspace(xmin, xmax, 1000)
+            xscale = "linear"
+        else:
+            x_interp = np.logspace(np.log10(xmin), np.log10(xmax), 1000)
+            xscale = "log"
         fig, ax = plt.subplots()
         if self.c is not None:
             df = pd.DataFrame({"x": self.x, "y": self.y, "c": self.c})
@@ -142,6 +149,20 @@ class DRC3(BaseDRC):
         return bottom + x * (top - bottom) / (ec50 + x)
 
 
+class LogDRC3(BaseDRC):
+    """3 parameter dose response curve with log-transformed concentrations"""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.log_transformed = True
+        if self.bounds is None:
+            self.bounds = ((-np.inf, -np.inf, -np.inf), (np.inf, np.inf, np.inf))
+
+    @staticmethod
+    def model(x, top, bottom, ec50, hillslope=1) -> np.ndarray:
+        return bottom + (top - bottom) / (1 + 10 ** (ec50 - x))
+
+
 class DRC4(BaseDRC):
     """4 parameter dose response curve"""
 
@@ -154,6 +175,20 @@ class DRC4(BaseDRC):
 
     @staticmethod
     def model(x, top, bottom, ec50, hillslope) -> np.ndarray:
-        return bottom + (x**hillslope) * (top - bottom) / (
-            (x**hillslope) + (ec50**1)
-        )
+        numerator = bottom + (x**hillslope) * (top - bottom)
+        denominator = (x**hillslope) + (ec50**hillslope)
+        return numerator / denominator
+
+
+class LogDRC4(BaseDRC):
+    """4 parameter dose response curve with log-transformed concentrations"""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.log_transformed = True
+        if self.bounds is None:
+            self.bounds = ((-np.inf, -np.inf, -np.inf, -3), (np.inf, np.inf, np.inf, 3))
+
+    @staticmethod
+    def model(x, top, bottom, ec50, hillslope) -> np.ndarray:
+        return bottom + (top - bottom) / (1 + 10 ** ((ec50 - x) * hillslope))
